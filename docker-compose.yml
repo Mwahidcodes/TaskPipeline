@@ -1,0 +1,57 @@
+services:
+  # 1. Database Container (PostgreSQL)
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: pipeline_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password_here
+      POSTGRES_DB: taskpipeline
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # Is line se hamari schema.sql file database start hote hi automatic run ho jayegi!
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - pipeline_network
+
+  # 2. Backend Container
+  backend:
+    build: ./backend
+    container_name: pipeline_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DB_USER=postgres
+      - DB_PASSWORD=your_password_here
+      - DB_HOST=postgres_db
+      - DB_PORT=5432
+      - DB_NAME=taskpipeline
+      - JWT_SECRET=my_super_secret_devops_key_123
+    depends_on:
+      - postgres_db
+    networks:
+      - pipeline_network
+
+  # 3. Frontend Container
+  frontend:
+    build: ./frontend
+    container_name: pipeline_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - pipeline_network
+
+volumes:
+  db_data:
+
+networks:
+  pipeline_network:
+    driver: bridge
