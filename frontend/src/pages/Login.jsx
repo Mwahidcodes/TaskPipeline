@@ -23,7 +23,7 @@ function Login({ setPage, setToken, setUser }) {
                 setMessage(data.message);
             }
         } catch (err) {
-            setMessage('The backend server connection could not be established ❌');
+            setMessage('The backend server connection could not be established. ❌');
         }
     };
 
