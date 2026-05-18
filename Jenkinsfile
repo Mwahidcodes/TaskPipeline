@@ -27,7 +27,7 @@ pipeline {
                   -Dsonar.projectKey=TaskPipeline \
                   -Dsonar.sources=. \
                   -Dsonar.host.url=http://13.48.246.48:9000 \
-                  -Dsonar.login=admin
+                  -Dsonar.login=squ_ec1ebe09945b0ee9234e91c63e8163cd8cc9650d
                 '''
             }
         }
