@@ -18,21 +18,24 @@ pipeline {
 
         stage('SonarQube Static Analysis') {
             steps {
-                echo 'Scanning code layout for quality gates and bugs...'
-                echo 'SonarQube analysis complete. Quality Gate: PASSED'
+                echo 'Executing Real SonarQube Code Scanning on 3-Tier Structure...'
+                // Yeh command project core scan karke metrics container ko bhejegi
+                // Humne || echo lagaya hy taake pehli baar scanner setup download na hone par pipeline rukay nahi
+                sh '''
+                echo "Starting Scanner..."
+                docker run --rm -v "${WORKSPACE}:/usr/src" sonarsource/sonar-scanner-cli \
+                  -Dsonar.projectKey=TaskPipeline \
+                  -Dsonar.sources=. \
+                  -Dsonar.host.url=http://13.48.246.48:9000 \
+                  -Dsonar.login=admin
+                '''
             }
         }
 
         stage('Build 3-Tier Docker Images') {
             steps {
                 echo 'Compiling Real 3-Tier Application Modules...'
-                
-                // 1. Backend Image Build (Aapke project path ke mutabik)
-                echo 'Building Backend Image...'
                 sh 'docker build -t taskpipeline-backend:latest ./backend || echo "Backend build simulated"'
-                
-                // 2. Frontend Image Build
-                echo 'Building Frontend Image...'
                 sh 'docker build -t taskpipeline-frontend:latest ./frontend || echo "Frontend build simulated"'
             }
         }
