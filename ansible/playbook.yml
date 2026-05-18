@@ -1,0 +1,21 @@
+---
+- name: Verify and Enforce Base DevOps Tools
+  hosts: all_servers
+  become: yes
+  tasks:
+    - name: Ensure Package Cache is Updated
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Verify Docker Service is Active
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Verify Jenkins Service is Active
+      systemd:
+        name: jenkins
+        state: started
+        enabled: yes
