@@ -12,16 +12,15 @@ pipeline {
         stage('Execute Ansible Verification') {
             steps {
                 echo 'Running Ansible Playbook to verify environment tools...'
-                // Yeh command Jenkins ko bolegi ke jo ansible folder aapne push kiya hy, usay run kare
                 sh 'ansible-playbook -i ansible/hosts ansible/playbook.yml'
             }
         }
 
-        stage('Simulate Docker Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Building Share4Good Application Docker Images...'
-                // Yahan hum aage chal kar real docker build commands dalenge
-                sh 'docker --version'
+                echo 'Compiling Share4Good Application Module into Docker Image...'
+                // Yeh command Dockerfile ko read karke local image build karegi
+                sh 'docker build -t share4good-app:latest .'
             }
         }
     }
