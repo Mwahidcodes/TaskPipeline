@@ -18,7 +18,7 @@ function Dashboard({ token, user, handleLogout }) {
                 setTasks(data);
             }
         } catch (err) {
-            console.error('Tasks fetch karne mein error:', err);
+            console.error('Error while fetching task:', err);
         }
     };
 
@@ -47,7 +47,7 @@ function Dashboard({ token, user, handleLogout }) {
                 setMessage(data.message);
             }
         } catch (err) {
-            setMessage('Task add nahi ho saka! ❌');
+            setMessage('Task could not be added! ❌');
         }
     };
 
@@ -73,7 +73,7 @@ function Dashboard({ token, user, handleLogout }) {
 
     // Task delete karne ka handler
     const handleDeleteTask = async (id) => {
-        if (!window.confirm('ℹ️ Kya aap waqai yeh task delete karna chahti hain?')) return;
+        if (!window.confirm('ℹ️ Do you want to delete this task?')) return;
         try {
             const res = await fetch(`${BACKEND_URL}/api/tasks/${id}`, {
                 method: 'DELETE',

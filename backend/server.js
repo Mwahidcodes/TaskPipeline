@@ -7,20 +7,23 @@ const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
 
-// Middleware
-app.use(cors()); // Frontend ko connect karne ki ijazat deta hai
-app.use(express.json()); // JSON data read karne ke liye
+// Updated CORS Middleware
+app.use(cors({
+    origin: '*', // Production mein yahan aap apne frontend ka exact URL daal sakti hain
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// API Routes Links
+app.use(express.json());
+
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Test Route to check if backend is running
 app.get('/', (req, res) => {
     res.send('TaskPipeline Backend API running successfully! 🚀');
 });
 
-// Port configuration
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server port ${PORT} par live chal raha hai... 🔥`);

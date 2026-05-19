@@ -11,6 +11,28 @@
     - name: Verify Jenkins Service is Active
       service: { name: jenkins, state: started }
 
+- name: Setup MicroK8s on Production Server
+  hosts: production
+  become: yes
+  tasks:
+    - name: Install MicroK8s
+      snap:
+        name: microk8s
+        classic: yes
+
+    - name: Wait for MicroK8s to be ready
+      command: microk8s status --wait-ready
+
+    - name: Add user to microk8s group
+      user:
+        name: ubuntu
+        groups: microk8s
+        append: yes
+
+    - name: Create kubectl alias
+      command: snap alias microk8s.kubectl kubectl
+      ignore_errors: yes
+
 - name: Deploy TaskPipeline Modules to Production K8s
   hosts: production
   become: true
@@ -30,19 +52,19 @@
         mode: '0644'
 
     - name: Delete existing backend service to release port 30081
-      shell: "sudo microk8s kubectl delete service taskpipeline-backend-service --ignore-not-found=true"
+      shell: "microk8s kubectl delete service taskpipeline-backend-service --ignore-not-found=true"
 
     - name: Apply Backend Deployment to MicroK8s
-      shell: "sudo microk8s kubectl apply -f /home/ubuntu/k8s/backend-deployment.yaml"
+      shell: "microk8s kubectl apply -f /home/ubuntu/k8s/backend-deployment.yaml"
 
     - name: Apply Frontend Deployment to MicroK8s
-      shell: "sudo microk8s kubectl apply -f /home/ubuntu/k8s/frontend-deployment.yaml"
+      shell: "microk8s kubectl apply -f /home/ubuntu/k8s/frontend-deployment.yaml"
 
     - name: Wait for Pods to stabilize
       pause: { seconds: 15 }
 
     - name: Show Pods Status
-      shell: "sudo microk8s kubectl get pods -A"
+      shell: "microk8s kubectl get pods -A"
       register: pods_output
 
     - name: Print Pods

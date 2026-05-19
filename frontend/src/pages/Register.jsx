@@ -16,13 +16,13 @@ function Register({ setPage }) {
             });
             const data = await res.json();
             if (res.ok) {
-                alert('Registration Kamyab! 🎉 Ab aap login kar sakti hain.');
+                alert('Registration successful! 🎉 you can login now.');
                 setPage('login');
             } else {
                 setMessage(data.message || 'Registration Failed!');
             }
         } catch (err) {
-            setMessage('Backend server se connection nahi ho saka! ❌');
+            setMessage('Backend server could not connect! ❌');
         }
     };
 
@@ -47,7 +47,7 @@ function Register({ setPage }) {
                     </div>
                     <button type="submit" className="btn">Sign Up</button>
                 </form>
-                <p className="auth-redirect">Pehle se account hai? <span onClick={() => setPage('login')}>Login Karein</span></p>
+                <p className="auth-redirect">Already have an account? <span onClick={() => setPage('login')}>Login</span></p>
             </div>
         </div>
     );

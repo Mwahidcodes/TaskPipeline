@@ -33,7 +33,7 @@ function Login({ setPage, setToken, setUser }) {
                 setMessage(data.message || 'Login Failed!');
             }
         } catch (err) {
-            setMessage('Backend server se connection nahi ho saka! ❌');
+            setMessage('Backend server could not connect! ❌');
         }
     };
 
@@ -54,7 +54,7 @@ function Login({ setPage, setToken, setUser }) {
                     </div>
                     <button type="submit" className="btn">Secure Login</button>
                 </form>
-                <p className="auth-redirect">Account nahi hai? <span onClick={() => setPage('register')}>Sign Up Karein</span></p>
+                <p className="auth-redirect">Don't have an account? <span onClick={() => setPage('register')}>Sign Up</span></p>
             </div>
         </div>
     );
