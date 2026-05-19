@@ -2,4 +2,4 @@
 127.0.0.1 ansible_connection=local
 
 [production]
-16.171.42.170 ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+16.171.42.170 ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'

@@ -21,42 +21,24 @@
 # =========================================================================
 # 🚀 TARGETING PRODUCTION HOSTS (16.171.42.170)
 # =========================================================================
-- name: Deploy TaskPipeline Modules to Remote Production Server K8s
+- name: Deploy TaskPipeline Modules to Production K8s
   hosts: production
   become: true
   tasks:
-    - name: Create tmp directory for K8s manifests
-      file:
-        path: /tmp/k8s
-        state: directory
-        mode: '0755'
-
-    - name: Transfer Kubernetes Manifests
-      copy:
-        src: "{{ item }}"
-        dest: "/tmp/k8s/{{ item | basename }}"
-        mode: '0644'
-      loop:
-        - k8s/backend-deployment.yaml
-        - k8s/frontend-deployment.yaml
-
     - name: Apply Backend Deployment to MicroK8s
-      shell: "microk8s kubectl apply -f /tmp/k8s/backend-deployment.yaml"
+      shell: "microk8s kubectl apply -f /var/lib/jenkins/workspace/TaskPipeline-Job/k8s/backend-deployment.yaml"
 
     - name: Apply Frontend Deployment to MicroK8s
-      shell: "microk8s kubectl apply -f /tmp/k8s/frontend-deployment.yaml"
+      shell: "microk8s kubectl apply -f /var/lib/jenkins/workspace/TaskPipeline-Job/k8s/frontend-deployment.yaml"
 
-    - name: Flush MicroK8s Packet Forwarding Rules for External Access
-      shell: "iptables -P FORWARD ACCEPT"
-
-    - name: Wait for Pods to get ready
+    - name: Wait for Pods
       pause:
         seconds: 10
 
-    - name: Show Live Kubernetes Pods Status
-      shell: "microk8s kubectl get pods -A -o wide"
-      register: k8s_pods_output
+    - name: Show Pods Status
+      shell: "microk8s kubectl get pods -A"
+      register: pods_output
 
-    - name: Print Pods Matrix in Logs
+    - name: Print Pods
       debug:
-        var: k8s_pods_output.stdout_lines
+        var: pods_output.stdout_lines

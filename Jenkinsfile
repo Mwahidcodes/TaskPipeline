@@ -61,11 +61,10 @@ pipeline {
 
         stage('Kubernetes Native Production Deployment') {
             steps {
-                // Yahan hum SSH key (prod-server-key) ka use kar rahe hain
+                // Yahan ID wahi honi chahiye jo aapne Manage Jenkins > Credentials mein di thi
                 sshagent(['prod-server-key']) {
                     echo 'Deploying Application Modules to MicroK8s Cluster via Ansible...'
                     sh 'ansible-playbook -i ansible/hosts ansible/playbook.yml'
-                    echo '=== DEPLOYMENT COMMAND SENT TO PRODUCTION SERVER ==='
                 }
             }
         }
