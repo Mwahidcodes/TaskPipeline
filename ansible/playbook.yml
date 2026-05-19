@@ -15,7 +15,13 @@
   hosts: production
   become: true
   tasks:
-    # 1. Files ko Production server par copy karein
+    - name: Ensure k8s directory exists on remote
+      file:
+        path: /home/ubuntu/k8s/
+        state: directory
+        owner: ubuntu
+        mode: '0755'
+
     - name: Copy K8s manifests to remote server
       copy:
         src: ../k8s/
@@ -23,19 +29,17 @@
         owner: ubuntu
         mode: '0644'
 
-    # 2. Delete existing services to prevent port conflicts
     - name: Delete existing backend service to release port 30081
       shell: "sudo microk8s kubectl delete service taskpipeline-backend-service --ignore-not-found=true"
 
-    # 3. Apply configurations from the folder
     - name: Apply Backend Deployment to MicroK8s
       shell: "sudo microk8s kubectl apply -f /home/ubuntu/k8s/backend-deployment.yaml"
 
     - name: Apply Frontend Deployment to MicroK8s
       shell: "sudo microk8s kubectl apply -f /home/ubuntu/k8s/frontend-deployment.yaml"
 
-    - name: Wait for Pods
-      pause: { seconds: 10 }
+    - name: Wait for Pods to stabilize
+      pause: { seconds: 15 }
 
     - name: Show Pods Status
       shell: "sudo microk8s kubectl get pods -A"
