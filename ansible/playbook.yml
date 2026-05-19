@@ -23,7 +23,11 @@
         owner: ubuntu
         mode: '0644'
 
-    # 2. Sudo ke saath apply karein
+    # 2. Delete existing services to prevent port conflicts
+    - name: Delete existing backend service to release port 30081
+      shell: "sudo microk8s kubectl delete service taskpipeline-backend-service --ignore-not-found=true"
+
+    # 3. Apply configurations from the folder
     - name: Apply Backend Deployment to MicroK8s
       shell: "sudo microk8s kubectl apply -f /home/ubuntu/k8s/backend-deployment.yaml"
 
