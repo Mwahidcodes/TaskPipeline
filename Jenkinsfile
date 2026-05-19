@@ -50,12 +50,37 @@ pipeline {
             steps {
                 echo 'Logging into Docker Hub and Pushing Images...'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh "docker tag taskpipeline-frontend:latest ${DOCKER_USER}/taskpipeline-frontend:latest"
+                    sh "docker tag taskpipeline-frontend:latest \${DOCKER_USER}/taskpipeline-frontend:latest"
                     sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
-                    sh "docker push ${DOCKER_USER}/taskpipeline-frontend:latest"
-                    sh "docker tag taskpipeline-backend:latest ${DOCKER_USER}/taskpipeline-backend:latest"
-                    sh "docker push ${DOCKER_USER}/taskpipeline-backend:latest"
+                    sh "docker push \${DOCKER_USER}/taskpipeline-frontend:latest"
+                    sh "docker tag taskpipeline-backend:latest \${DOCKER_USER}/taskpipeline-backend:latest"
+                    sh "docker push \${DOCKER_USER}/taskpipeline-backend:latest"
                 }
+            }
+        }
+
+        stage('Kubernetes Native Production Deployment') {
+            steps {
+                echo 'Deploying Application Modules to MicroK8s Cluster...'
+                
+                // Kubernetes manifests apply kar rahe hain hamare cluster par
+                sh 'microk8s kubectl apply -f k8s/backend-deployment.yaml'
+                sh 'microk8s kubectl apply -f k8s/frontend-deployment.yaml'
+                
+                // Network Link Reset Configuration: Yeh AWS external traffic ko allow karega
+                echo 'Flushing MicroK8s proxy network boundaries for public access...'
+                sh 'sudo iptables -P FORWARD ACCEPT'
+                
+                // 15 seconds ka explicit wait taake Kubernetes cluster mein pods safely run ho sakein
+                echo 'Waiting for pods to transition to Running state...'
+                sh 'sleep 15'
+                
+                // Project report aur verification ke liye live matrix print karna
+                echo '=== LIVE KUBERNETES PODS STATUS ==='
+                sh 'microk8s kubectl get pods -A -o wide'
+                
+                echo '=== LIVE KUBERNETES SERVICES (PORTS) MAP ==='
+                sh 'microk8s kubectl get svc -A'
             }
         }
     }
