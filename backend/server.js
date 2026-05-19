@@ -11,10 +11,14 @@ const app = express();
 // Database configuration
 const pool = new Pool({
   user: process.env.DB_USER,
-  host: process.env.DB_HOST, // Yahan hum server ki Private IP denge
+  host: process.env.DB_HOST,
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: 5432,
+  // Ye naye parameters add karein:
+  idleTimeoutMillis: 30000,      // 30 seconds idle rehne par connection release kare
+  connectionTimeoutMillis: 2000, // 2 seconds tak connect na ho to error de
+  max: 20                        // Ek sath maximum 20 connections allow kare
 });
 
 // Database connection test
