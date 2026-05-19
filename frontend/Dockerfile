@@ -1,14 +1,15 @@
-# Base image for React
-FROM node:18-alpine
-
-WORKDIR /usr/src/app
-
+# 1. Build stage
+FROM node:18 AS build
+WORKDIR /app
 COPY package*.json ./
 RUN npm install
-
 COPY . .
+# Ye command production build banayegi
+RUN npm run build 
 
-EXPOSE 3000
-
-# React development server chalane ke liye
-CMD ["npm", "start"]
+# 2. Production stage (Nginx)
+FROM nginx:alpine
+# Build output ko nginx ki folder mein copy karein
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
