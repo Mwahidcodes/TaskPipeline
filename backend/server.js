@@ -1,15 +1,34 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const { Pool } = require('pg'); // PG library import ki
 
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
 
+// Database configuration
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST, // Yahan hum server ki Private IP denge
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: 5432,
+});
+
+// Database connection test
+pool.connect((err, client, done) => {
+  if (err) {
+    console.error('Database connection error:', err.stack);
+  } else {
+    console.log('Database se kamyabi se connect ho gaye! ✅');
+  }
+});
+
 // Updated CORS Middleware
 app.use(cors({
-    origin: '*', // Production mein yahan aap apne frontend ka exact URL daal sakti hain
+    origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
