@@ -1,11 +1,48 @@
+# --- Database Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-db
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "maria"
+        - name: POSTGRES_DB
+          value: "taskpipeline"
+        ports:
+        - containerPort: 5432
+---
+# --- Database Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+# --- Backend Deployment ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: taskpipeline-backend
-  labels:
-    app: taskpipeline-backend
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: taskpipeline-backend
@@ -17,26 +54,27 @@ spec:
       containers:
       - name: backend
         image: mariawahid/taskpipeline-backend:latest
-        ports:
-        - containerPort: 5000
         env:
+        - name: DB_HOST
+          value: "postgres-service"
         - name: DB_USER
           value: "postgres"
         - name: DB_PASSWORD
           value: "maria"
-        - name: DB_HOST
-          value: "16.171.42.170"  # Server IP
-        - name: DB_PORT
-          value: "5432"
         - name: DB_NAME
           value: "taskpipeline"
+        - name: DB_PORT
+          value: "5432"
         - name: JWT_SECRET
-          value: "my_super_secret_devops_key_123"
+          value: "mySuperSecretKey123"
+        ports:
+        - containerPort: 5000
 ---
+# --- Backend Service ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: taskpipeline-backend-service
 spec:
   type: NodePort
   selector:
@@ -44,4 +82,4 @@ spec:
   ports:
     - port: 5000
       targetPort: 5000
-      nodePort: 30005
+      nodePort: 30081

@@ -1,3 +1,4 @@
+# k8s/backend-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,6 +8,6 @@ spec:
   selector:
     app: taskpipeline-backend
   ports:
-    - port: 5000
-      targetPort: 5000
-      nodePort: 30005
+    - port: 5000         # Backend ka internal port
+      targetPort: 5000   # Container port
+      nodePort: 30081    # React se request yahan jayegi

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BACKEND_URL } from '../config';
+import { BACKEND_URL } from '../config'; // Config import kiya
 
 function Register({ setPage }) {
     const [formData, setFormData] = useState({ username: '', email: '', password: '' });
@@ -8,22 +8,49 @@ function Register({ setPage }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Yahan localhost ki jagah BACKEND_URL use kiya
             const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
-            if (res.ok) { alert('Success!'); setPage('login'); } 
-            else { setMessage('Failed'); }
-        } catch (err) { setMessage('Server connection failed!'); }
+            const data = await res.json();
+            if (res.ok) {
+                alert('Registration Kamyab! 🎉 Ab aap login kar sakti hain.');
+                setPage('login');
+            } else {
+                setMessage(data.message || 'Registration Failed!');
+            }
+        } catch (err) {
+            setMessage('Backend server se connection nahi ho saka! ❌');
+        }
     };
+
     return (
-        <form onSubmit={handleSubmit}>
-            <input placeholder="Username" onChange={(e) => setFormData({...formData, username: e.target.value})} />
-            <input type="email" placeholder="Email" onChange={(e) => setFormData({...formData, email: e.target.value})} />
-            <input type="password" placeholder="Password" onChange={(e) => setFormData({...formData, password: e.target.value})} />
-            <button type="submit">Sign Up</button>
-        </form>
+        <div className="auth-container">
+            <div className="auth-card">
+                <h2>TaskPipeline</h2>
+                <p style={{textAlign: 'center', color: '#94a3b8'}}>Create New Account</p>
+                {message && <p style={{ color: '#ef4444', textAlign: 'center' }}>{message}</p>}
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label>Username</label>
+                        <input type="text" required onChange={(e) => setFormData({...formData, username: e.target.value})} />
+                    </div>
+                    <div className="form-group">
+                        <label>Email Address</label>
+                        <input type="email" required onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                    </div>
+                    <div className="form-group">
+                        <label>Password</label>
+                        <input type="password" required onChange={(e) => setFormData({...formData, password: e.target.value})} />
+                    </div>
+                    <button type="submit" className="btn">Sign Up</button>
+                </form>
+                <p className="auth-redirect">Pehle se account hai? <span onClick={() => setPage('login')}>Login Karein</span></p>
+            </div>
+        </div>
     );
 }
+
 export default Register;
