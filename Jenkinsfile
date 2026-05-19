@@ -19,15 +19,13 @@ pipeline {
         stage('SonarQube Static Analysis') {
             steps {
                 echo 'Executing Real SonarQube Code Scanning on 3-Tier Structure...'
-                // Yeh command project core scan karke metrics container ko bhejegi
-                // Humne || echo lagaya hy taake pehli baar scanner setup download na hone par pipeline rukay nahi
                 sh '''
                 echo "Starting Scanner..."
                 docker run --rm -v "${WORKSPACE}:/usr/src" sonarsource/sonar-scanner-cli \
                   -Dsonar.projectKey=TaskPipeline \
                   -Dsonar.sources=. \
                   -Dsonar.host.url=http://13.48.246.48:9000 \
-                  -Dsonar.login=squ_ec1ebe09945b0ee9234e91c63e8163cd8cc9650d
+                  -Dsonar.token=squ_ec1ebe09945b0ee9234e91c63e8163cd8cc9650d
                 '''
             }
         }
@@ -37,6 +35,14 @@ pipeline {
                 echo 'Compiling Real 3-Tier Application Modules...'
                 sh 'docker build -t taskpipeline-backend:latest ./backend || echo "Backend build simulated"'
                 sh 'docker build -t taskpipeline-frontend:latest ./frontend || echo "Frontend build simulated"'
+            }
+        }
+
+        stage('DevSecOps Vulnerability Scan (Trivy)') {
+            steps {
+                echo 'Scanning Frontend and Backend Images using Trivy...'
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL taskpipeline-frontend:latest || echo "Frontend vulnerabilities detected but allowing build to proceed"'
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL taskpipeline-backend:latest || echo "Backend vulnerabilities detected but allowing build to proceed"'
             }
         }
     }
