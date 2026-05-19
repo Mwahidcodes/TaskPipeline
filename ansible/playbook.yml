@@ -1,21 +1,62 @@
 ---
 - name: Verify and Enforce Base DevOps Tools
-  hosts: all_servers
-  become: yes
+  hosts: localhost
+  become: true
   tasks:
     - name: Ensure Package Cache is Updated
       apt:
         update_cache: yes
-        cache_valid_time: 3600
+      ignore_errors: yes
 
     - name: Verify Docker Service is Active
-      systemd:
+      service:
         name: docker
         state: started
-        enabled: yes
 
     - name: Verify Jenkins Service is Active
-      systemd:
+      service:
         name: jenkins
         state: started
-        enabled: yes
+
+# =========================================================================
+# 🚀 TARGETING PRODUCTION HOSTS (16.171.42.170)
+# =========================================================================
+- name: Deploy TaskPipeline Modules to Remote Production Server K8s
+  hosts: production
+  become: true
+  tasks:
+    - name: Create tmp directory for K8s manifests
+      file:
+        path: /tmp/k8s
+        state: directory
+        mode: '0755'
+
+    - name: Transfer Kubernetes Manifests to Production Server
+      copy:
+        src: "{{ item }}"
+        dest: "/tmp/k8s/{{ item | basename }}"
+        mode: '0644'
+      loop:
+        - k8s/backend-deployment.yaml
+        - k8s/frontend-deployment.yaml
+
+    - name: Apply Backend Deployment to MicroK8s
+      shell: "microk8s kubectl apply -f /tmp/k8s/backend-deployment.yaml"
+
+    - name: Apply Frontend Deployment to MicroK8s
+      shell: "microk8s kubectl apply -f /tmp/k8s/frontend-deployment.yaml"
+
+    - name: Flush MicroK8s Packet Forwarding Rules for External Access
+      shell: "iptables -P FORWARD ACCEPT"
+
+    - name: Wait for Pods to get ready
+      pause:
+        seconds: 10
+
+    - name: Show Live Kubernetes Pods Status
+      shell: "microk8s kubectl get pods -A -o wide"
+      register: k8s_pods_output
+
+    - name: Print Pods Matrix in Logs
+      debug:
+        var: k8s_pods_output.stdout_lines
