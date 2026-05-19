@@ -31,7 +31,7 @@
         state: directory
         mode: '0755'
 
-    - name: Transfer Kubernetes Manifests to Production Server
+    - name: Transfer Kubernetes Manifests
       copy:
         src: "{{ item }}"
         dest: "/tmp/k8s/{{ item | basename }}"
