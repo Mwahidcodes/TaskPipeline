@@ -64,7 +64,7 @@ pipeline {
                 echo 'Deploying Application Modules to MicroK8s Cluster via Ansible...'
                 
                 // Hum local machine par command nahi chalayenge, balke ansible ko bolenge ke naye server par k8s deploy kare
-                sh 'ansible-playbook -i ansible/hosts ansible/deploy-k8s.yml'
+                sh 'ansible-playbook -i ansible/hosts ansible/playbook.yml'
                 
                 echo '=== DEPLOYMENT COMMAND SENT TO PRODUCTION SERVER ==='
             }
