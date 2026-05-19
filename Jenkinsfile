@@ -61,26 +61,26 @@ pipeline {
 
         stage('Kubernetes Native Production Deployment') {
             steps {
-                echo 'Deploying Application Modules to MicroK8s Cluster...'
+                echo 'Deploying Application Modules to MicroK8s Cluster using absolute binary paths...'
                 
-                // Kubernetes manifests apply kar rahe hain hamare cluster par
-                sh 'microk8s kubectl apply -f k8s/backend-deployment.yaml'
-                sh 'microk8s kubectl apply -f k8s/frontend-deployment.yaml'
+                // MicroK8s commands ko sudo aur explicit path variables ke sath trigger kar rahe hain
+                sh 'sudo /snap/bin/microk8s kubectl apply -f k8s/backend-deployment.yaml'
+                sh 'sudo /snap/bin/microk8s kubectl apply -f k8s/frontend-deployment.yaml'
                 
-                // Network Link Reset Configuration: Yeh AWS external traffic ko allow karega
+                // Network Link Reset Configuration: Yeh AWS external traffic boundaries open karega
                 echo 'Flushing MicroK8s proxy network boundaries for public access...'
                 sh 'sudo iptables -P FORWARD ACCEPT'
                 
-                // 15 seconds ka explicit wait taake Kubernetes cluster mein pods safely run ho sakein
+                // 15 seconds ka explicit wait taake pods initialization completely finish kar sakein
                 echo 'Waiting for pods to transition to Running state...'
                 sh 'sleep 15'
                 
-                // Project report aur verification ke liye live matrix print karna
+                // Project report matrix print karna pipeline logs mein
                 echo '=== LIVE KUBERNETES PODS STATUS ==='
-                sh 'microk8s kubectl get pods -A -o wide'
+                sh 'sudo /snap/bin/microk8s kubectl get pods -A -o wide'
                 
                 echo '=== LIVE KUBERNETES SERVICES (PORTS) MAP ==='
-                sh 'microk8s kubectl get svc -A'
+                sh 'sudo /snap/bin/microk8s kubectl get svc -A'
             }
         }
     }
