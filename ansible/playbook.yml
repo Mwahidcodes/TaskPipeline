@@ -21,18 +21,18 @@
         src: ../k8s/
         dest: /home/ubuntu/k8s/
 
-    # 2. Path fix karke apply karein (Full path /snap/bin/microk8s ka istemaal)
+    # 2. Path fix karke apply karein (microk8s.kubectl ka istemaal)
     - name: Apply Backend Deployment to MicroK8s
-      shell: "/snap/bin/microk8s kubectl apply -f /home/ubuntu/k8s/backend-deployment.yaml"
+      shell: "microk8s.kubectl apply -f /home/ubuntu/k8s/backend-deployment.yaml"
 
     - name: Apply Frontend Deployment to MicroK8s
-      shell: "/snap/bin/microk8s kubectl apply -f /home/ubuntu/k8s/frontend-deployment.yaml"
+      shell: "microk8s.kubectl apply -f /home/ubuntu/k8s/frontend-deployment.yaml"
 
     - name: Wait for Pods
       pause: { seconds: 10 }
 
     - name: Show Pods Status
-      shell: "/snap/bin/microk8s kubectl get pods -A"
+      shell: "microk8s.kubectl get pods -A"
       register: pods_output
 
     - name: Print Pods
