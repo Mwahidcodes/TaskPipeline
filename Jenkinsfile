@@ -61,12 +61,12 @@ pipeline {
 
         stage('Kubernetes Native Production Deployment') {
             steps {
-                echo 'Deploying Application Modules to MicroK8s Cluster via Ansible...'
-                
-                // Hum local machine par command nahi chalayenge, balke ansible ko bolenge ke naye server par k8s deploy kare
-                sh 'ansible-playbook -i ansible/hosts ansible/playbook.yml'
-                
-                echo '=== DEPLOYMENT COMMAND SENT TO PRODUCTION SERVER ==='
+                // Yahan hum SSH key (prod-server-key) ka use kar rahe hain
+                sshagent(['prod-server-key']) {
+                    echo 'Deploying Application Modules to MicroK8s Cluster via Ansible...'
+                    sh 'ansible-playbook -i ansible/hosts ansible/playbook.yml'
+                    echo '=== DEPLOYMENT COMMAND SENT TO PRODUCTION SERVER ==='
+                }
             }
         }
     }
