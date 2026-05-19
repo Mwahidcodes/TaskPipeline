@@ -45,5 +45,18 @@ pipeline {
                 sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL taskpipeline-backend:latest || echo "Backend vulnerabilities detected but allowing build to proceed"'
             }
         }
+
+        stage('Push Images to Docker Hub') {
+            steps {
+                echo 'Logging into Docker Hub and Pushing Images...'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "docker tag taskpipeline-frontend:latest ${DOCKER_USER}/taskpipeline-frontend:latest"
+                    sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+                    sh "docker push ${DOCKER_USER}/taskpipeline-frontend:latest"
+                    sh "docker tag taskpipeline-backend:latest ${DOCKER_USER}/taskpipeline-backend:latest"
+                    sh "docker push ${DOCKER_USER}/taskpipeline-backend:latest"
+                }
+            }
+        }
     }
 }
