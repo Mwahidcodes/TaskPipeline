@@ -61,10 +61,10 @@ pipeline {
 
         stage('Kubernetes Native Production Deployment') {
             steps {
-                echo 'Deploying Application Modules...'
-                // sshagent ko batayein ke specific ID use karni hai
-                sshagent(credentials: ['prod-server-key']) {
-                    sh 'ansible-playbook -i ansible/hosts ansible/playbook.yml -vvv'
+                echo 'Deploying Application Modules to MicroK8s Cluster...'
+                // Yeh block Jenkins ke 'prod-server-key' ko ek temporary file mein utar dega
+                sshagent(['prod-server-key']) {
+                    sh 'ansible-playbook -i ansible/hosts ansible/playbook.yml'
                 }
             }
         }
