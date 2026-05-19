@@ -20,19 +20,21 @@
       copy:
         src: ../k8s/
         dest: /home/ubuntu/k8s/
+        owner: ubuntu
+        mode: '0644'
 
-    # 2. Path fix karke apply karein (microk8s.kubectl ka istemaal)
+    # 2. Sudo ke saath apply karein
     - name: Apply Backend Deployment to MicroK8s
-      shell: "microk8s.kubectl apply -f /home/ubuntu/k8s/backend-deployment.yaml"
+      shell: "sudo microk8s kubectl apply -f /home/ubuntu/k8s/backend-deployment.yaml"
 
     - name: Apply Frontend Deployment to MicroK8s
-      shell: "microk8s.kubectl apply -f /home/ubuntu/k8s/frontend-deployment.yaml"
+      shell: "sudo microk8s kubectl apply -f /home/ubuntu/k8s/frontend-deployment.yaml"
 
     - name: Wait for Pods
       pause: { seconds: 10 }
 
     - name: Show Pods Status
-      shell: "microk8s.kubectl get pods -A"
+      shell: "sudo microk8s kubectl get pods -A"
       register: pods_output
 
     - name: Print Pods
