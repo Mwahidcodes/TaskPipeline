@@ -61,26 +61,12 @@ pipeline {
 
         stage('Kubernetes Native Production Deployment') {
             steps {
-                echo 'Deploying Application Modules to MicroK8s Cluster using absolute binary paths...'
+                echo 'Deploying Application Modules to MicroK8s Cluster via Ansible...'
                 
-                // MicroK8s commands ko sudo aur explicit path variables ke sath trigger kar rahe hain
-                sh 'sudo /snap/bin/microk8s kubectl apply -f k8s/backend-deployment.yaml'
-                sh 'sudo /snap/bin/microk8s kubectl apply -f k8s/frontend-deployment.yaml'
+                // Hum local machine par command nahi chalayenge, balke ansible ko bolenge ke naye server par k8s deploy kare
+                sh 'ansible-playbook -i ansible/hosts ansible/deploy-k8s.yml'
                 
-                // Network Link Reset Configuration: Yeh AWS external traffic boundaries open karega
-                echo 'Flushing MicroK8s proxy network boundaries for public access...'
-                sh 'sudo iptables -P FORWARD ACCEPT'
-                
-                // 15 seconds ka explicit wait taake pods initialization completely finish kar sakein
-                echo 'Waiting for pods to transition to Running state...'
-                sh 'sleep 15'
-                
-                // Project report matrix print karna pipeline logs mein
-                echo '=== LIVE KUBERNETES PODS STATUS ==='
-                sh 'sudo /snap/bin/microk8s kubectl get pods -A -o wide'
-                
-                echo '=== LIVE KUBERNETES SERVICES (PORTS) MAP ==='
-                sh 'sudo /snap/bin/microk8s kubectl get svc -A'
+                echo '=== DEPLOYMENT COMMAND SENT TO PRODUCTION SERVER ==='
             }
         }
     }
