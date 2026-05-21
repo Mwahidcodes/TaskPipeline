@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: taskpipeline-monitor
+  labels:
+    release: kube-prom-stack  # Yeh label aapke install kiye gaye stack se match hona chahiye
+spec:
+  selector:
+    matchLabels:
+      app: backend  # Yahan wahi label dein jo aapke backend deployment mein hai
+  endpoints:
+  - port: 5000  # Woh port jahan metrics hain
