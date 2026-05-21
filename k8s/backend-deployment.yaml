@@ -28,3 +28,6 @@ spec:
           value: "password123"
         - name: DB_NAME
           value: "taskpipeline"
+        # Niche wali line add ki hai:
+        - name: JWT_SECRET
+          value: "mySuperSecretKey123"

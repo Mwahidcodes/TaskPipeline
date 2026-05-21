@@ -36,11 +36,27 @@ pipeline {
             }
         }
 
+        stage('Trivy Container Scanning') {
+            steps {
+                echo 'Scanning Docker images for vulnerabilities...'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                            # Backend Scan
+                            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL ${DOCKER_USER}/taskpipeline-backend:latest
+                            
+                            # Frontend Scan
+                            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL ${DOCKER_USER}/taskpipeline-frontend:latest
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Kubernetes Native Production Deployment') {
             steps {
                 echo 'Deploying to MicroK8s Cluster via Ansible...'
                 sshagent(['prod-server-key']) {
-                    // Ansible runs on the Jenkins node, SSHes to Production, then runs sudo commands
                     sh 'ansible-playbook -i ansible/hosts ansible/playbook.yml'
                 }
             }

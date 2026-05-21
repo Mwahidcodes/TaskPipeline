@@ -1,12 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { Pool } = require('pg'); // PG library import ki
+const { Pool } = require('pg');
+const client = require('prom-client'); // 1. Library import karein
 
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
+
+// 2. Metrics Setup: Default system metrics collect karne ke liye
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics();
 
 // Database configuration
 const pool = new Pool({
@@ -15,10 +20,9 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: 5432,
-  // Ye naye parameters add karein:
-  idleTimeoutMillis: 30000,      // 30 seconds idle rehne par connection release kare
-  connectionTimeoutMillis: 2000, // 2 seconds tak connect na ho to error de
-  max: 20                        // Ek sath maximum 20 connections allow kare
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+  max: 20
 });
 
 // Database connection test
@@ -30,7 +34,7 @@ pool.connect((err, client, done) => {
   }
 });
 
-// Updated CORS Middleware
+// Middleware
 app.use(cors({
     origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -38,6 +42,12 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// 3. Metrics Endpoint: Prometheus yahan se data pull karega
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(await client.register.metrics());
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);
